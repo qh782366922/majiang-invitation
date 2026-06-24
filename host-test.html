@@ -2,21 +2,23 @@
 <html lang="zh-CN">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>查看报名</title>
 <style>
-body{font-family:sans-serif;padding:16px;text-align:center;background:#FFF9F0;color:#3A3A3A}
+body{font-family:sans-serif;padding:16px;text-align:center;background:linear-gradient(180deg,#FFF9F0 0%,#F0F8F0 100%);color:#3A3A3A;min-height:100vh}
 input{padding:8px 12px;font-size:0.9rem;border-radius:8px;border:2px solid #2D8B4A;text-align:center}
 button{padding:8px 20px;font-size:0.9rem;background:#2D8B4A;color:#fff;border:none;border-radius:20px;cursor:pointer}
-#result{margin-top:20px;max-width:440px;margin-left:auto;margin-right:auto}
+#result{margin-top:20px;max-width:460px;margin-left:auto;margin-right:auto}
 table{width:100%;border-collapse:collapse;margin-top:8px}
-td,th{border:1px solid #eee;padding:10px 8px;font-size:0.9rem}
-th{background:#2D8B4A;color:#fff;font-weight:700}
-.game-card{background:#fff;border-radius:16px;padding:16px;margin-bottom:20px;box-shadow:0 2px 12px rgba(0,0,0,0.06);text-align:left}
-.game-title{color:#2D8B4A;margin:0 0 4px 0;font-size:1.1rem}
+td,th{border:1px solid rgba(45,139,74,0.15);padding:10px 8px;font-size:0.9rem}
+th{background:linear-gradient(135deg,#2D8B4A,#1e6b34);color:#fff;font-weight:700}
+.game-card{background:#fff;border-radius:16px;padding:20px;margin-bottom:20px;box-shadow:0 4px 20px rgba(45,139,74,0.1);text-align:left;position:relative;overflow:hidden;border:2px solid rgba(45,139,74,0.08)}
+.game-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#2D8B4A,#D4A853,#1e6b34)}
+.game-card::after{content:'🀄';position:absolute;bottom:-15px;right:-10px;font-size:5rem;opacity:0.03;pointer-events:none;transform:rotate(-15deg)}
+.game-title{color:#2D8B4A;margin:0 0 4px 0;font-size:1.15rem;font-weight:800}
 .game-meta{color:#888;font-size:0.8rem;margin:0 0 8px 0}
-.loc-row{color:#2D8B4A;font-size:0.85rem;margin:0 0 12px 0;display:flex;align-items:center;gap:8px}
+.loc-row{color:#2D8B4A;font-size:0.85rem;margin:0 0 12px 0;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .loc-inp{padding:4px 8px;border-radius:8px;border:2px solid #2D8B4A;font-size:0.85rem;width:180px}
 .empty-slot{color:#ccc}
 .btn-sm{padding:3px 12px;font-size:0.75rem;border:none;border-radius:10px;cursor:pointer}
-.btn-gold{background:#D4A853;color:#fff}
+.btn-gold{background:linear-gradient(135deg,#D4A853,#b8922e);color:#fff}
 .btn-gray{background:#ddd;color:#333}
 </style></head>
 <body>
