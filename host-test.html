@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>查看报名</title>
+<style>body{font-family:sans-serif;padding:20px;text-align:center;background:#FFF9F0}input{padding:12px;font-size:16px;border-radius:10px;border:2px solid #2D8B4A;margin:10px}button{padding:14px 40px;font-size:16px;background:#2D8B4A;color:#fff;border:none;border-radius:30px;cursor:pointer}#result{margin-top:20px;text-align:left;max-width:400px;margin-left:auto;margin-right:auto}table{width:100%;border-collapse:collapse}td,th{border:1px solid #ddd;padding:8px}th{background:#2D8B4A;color:#fff}</style></head>
+<body>
+<h2>查看报名</h2>
+<input type="password" id="pw" placeholder="密码">
+<button onclick="go()">查看</button>
+<div id="result"></div>
+<script>
+var KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ3Z2Jjc3RmcWpscmFxZm9waGp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMTMxOTksImV4cCI6MjA5Nzc4OTE5OX0.qjw1z2moKdpQ8piKwuKTGM69pl2wknuuN-8yWzdPmSk';
+async function go(){
+  if(document.getElementById('pw').value!=='majiang2024'){document.getElementById('result').textContent='密码错误';return}
+  document.getElementById('result').textContent='查询中...';
+  try{
+    var c=new AbortController();var t=setTimeout(function(){c.abort()},10000);
+    var r=await fetch('https://rwgbcstfqjlraqfophjw.supabase.co/rest/v1/responses?select=*&order=created_at.asc',{headers:{apikey:KEY,Authorization:'Bearer '+KEY},signal:c.signal});
+    clearTimeout(t);
+    var data=await r.json();
+    if(!data||!data.length){document.getElementById('result').textContent='暂无报名';return}
+    var h='<table><tr><th>姓名</th><th>时间</th><th>提交时间</th></tr>';
+    for(var i=0;i<data.length;i++){h+='<tr><td>'+data[i].name+'</td><td>'+data[i].datetime+'</td><td>'+new Date(data[i].created_at).toLocaleString('zh-CN')+'</td></tr>'}
+    h+='</table>';
+    document.getElementById('result').innerHTML=h;
+  }catch(e){document.getElementById('result').textContent='出错: '+e.message}
+}
+</script>
+</body></html>
