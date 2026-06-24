@@ -20,7 +20,12 @@
     async function apiSelect(table, order) {
       var url = SUPABASE_URL + '/rest/v1/' + table + '?select=*';
       if (order) url += '&order=' + order;
-      var res = await fetch(url, { headers: API_HEADERS });
+      var res = await fetch(url, {
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_KEY
+        }
+      });
       if (!res.ok) return { data: null, error: { message: 'HTTP ' + res.status } };
       return { data: await res.json(), error: null };
     }
