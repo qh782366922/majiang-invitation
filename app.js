@@ -328,8 +328,7 @@ async function viewResponses() {
       initStep(1);
     });
 
-    console.log('🀄 麻将邀约 — 基础框架已就绪');
-    console.log('Supabase 客户端状态:', supabase ? '已连接' : '未连接');
+    console.log('🀄 麻将邀约 — 已就绪 (fetch API mode)');
     console.log('当前步骤:', state.step);
 
     /* === FLOATING MAHJONG PARTICLES === */
