@@ -868,7 +868,7 @@
       <h2>东家查看牌局</h2>
       <p>输入密码查看受邀人列表。</p>
       <input type="password" id="hostPassword" class="host-password-input" placeholder="请输入东家密码" maxlength="32">
-      <button class="btn btn-gold" id="hostViewBtn" onclick="viewResponses()">查看</button>
+      <button class="btn btn-gold" id="hostViewBtn" onclick="viewResponsesHostInline()">查看</button>
       <div id="hostError" class="error-display"></div>
       <div id="hostTable" class="host-table hidden"></div>
     </div>
@@ -920,6 +920,33 @@
     window.addEventListener('DOMContentLoaded', function() {
       if (typeof goNext === 'undefined') console.error('app.js failed to load');
     });
+
+    // Inline host view (bypasses external app.js issues)
+    var SUPABASE_KEY_HOST = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ3Z2Jjc3RmcWpscmFxZm9waGp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMTMxOTksImV4cCI6MjA5Nzc4OTE5OX0.qjw1z2moKdpQ8piKwuKTGM69pl2wknuuN-8yWzdPmSk';
+    async function viewResponsesHostInline() {
+      try {
+        var pwd = document.getElementById('hostPassword').value;
+        var errEl = document.getElementById('hostError');
+        if (pwd !== 'majiang2024') { errEl.textContent = '密码错误'; errEl.style.display = 'block'; return; }
+        errEl.style.display = 'none';
+        errEl.textContent = '查询中...';
+        errEl.style.display = 'block';
+        var c = new AbortController();
+        var t = setTimeout(function() { c.abort(); }, 10000);
+        var r = await fetch('https://rwgbcstfqjlraqfophjw.supabase.co/rest/v1/responses?select=*&order=created_at.asc', { headers: { apikey: SUPABASE_KEY_HOST, Authorization: 'Bearer ' + SUPABASE_KEY_HOST }, signal: c.signal });
+        clearTimeout(t);
+        var data = await r.json();
+        errEl.style.display = 'none';
+        if (!data || !data.length) { document.getElementById('hostTable').innerHTML = '<p style=\"text-align:center;color:#D4A853;margin-top:20px;\">还没有人报名</p>'; return; }
+        var h = '<table class=\"host-table\"><thead><tr><th>姓名</th><th>时间</th><th>提交时间</th></tr></thead><tbody>';
+        for (var i = 0; i < data.length; i++) {
+          h += '<tr><td>' + data[i].name + '</td><td>' + data[i].datetime + '</td><td>' + new Date(data[i].created_at).toLocaleString('zh-CN') + '</td></tr>';
+        }
+        h += '</tbody></table>';
+        document.getElementById('hostTable').innerHTML = h;
+      } catch(e) { document.getElementById('hostError').textContent = '出错: ' + e.message; document.getElementById('hostError').style.display = 'block'; }
+    }
+    window.viewResponsesHostInline = viewResponsesHostInline;
   </script>
 </body>
 </html>
