@@ -24,17 +24,22 @@
     async function apiSelect(table, order) {
       var url = SUPABASE_URL + '/rest/v1/' + table + '?select=*';
       if (order) url += '&order=' + order;
+      var controller = new AbortController();
+      var timeout = setTimeout(function() { controller.abort(); }, 10000);
       try {
         var res = await fetch(url, {
           headers: {
             'apikey': SUPABASE_KEY,
             'Authorization': 'Bearer ' + SUPABASE_KEY
-          }
+          },
+          signal: controller.signal
         });
+        clearTimeout(timeout);
         if (!res.ok) return { data: null, error: { message: 'HTTP ' + res.status } };
         return { data: await res.json(), error: null };
       } catch(e) {
-        return { data: null, error: { message: e.message } };
+        clearTimeout(timeout);
+        return { data: null, error: { message: e.name === 'AbortError' ? '请求超时' : e.message } };
       }
     }
 
