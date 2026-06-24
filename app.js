@@ -215,8 +215,8 @@
       `;
     }
 
-    async function submitRSVP() {
-      const btn = event.target;
+    async function submitRSVP(e) {
+      const btn = e ? e.target : document.getElementById('btnSubmitRSVP');
       btn.disabled = true;
       btn.textContent = '提交中...';
       const { error } = await api.insert('responses', { name: state.name, datetime: state.datetime });
@@ -322,7 +322,7 @@ async function viewResponses() {
 
       // Submit button is dynamically created in initStep4, bind via delegation
       document.addEventListener('click', function(e) {
-        if (e.target && e.target.id === 'btnSubmitRSVP') submitRSVP();
+        if (e.target && e.target.id === 'btnSubmitRSVP') submitRSVP(e);
       });
 
       initStep(1);
