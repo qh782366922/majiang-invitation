@@ -4,28 +4,26 @@
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ3Z2Jjc3RmcWpscmFxZm9waGp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMTMxOTksImV4cCI6MjA5Nzc4OTE5OX0.qjw1z2moKdpQ8piKwuKTGM69pl2wknuuN-8yWzdPmSk';
 
     // ========== SUPABASE REST API (fetch-based, no SDK needed) ==========
-    const api = {
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': 'Bearer ' + SUPABASE_KEY,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=minimal'
-      },
-      async insert(table, row) {
-        const res = await fetch(SUPABASE_URL + '/rest/v1/' + table, {
-          method: 'POST', headers: this.headers, body: JSON.stringify(row)
-        });
-        if (!res.ok) return { error: { message: 'HTTP ' + res.status } };
-        return { error: null };
-      },
-      async select(table, order) {
-        var url = SUPABASE_URL + '/rest/v1/' + table + '?select=*';
-        if (order) url += '&order=' + order;
-        const res = await fetch(url, { headers: this.headers });
-        if (!res.ok) return { data: null, error: { message: 'HTTP ' + res.status } };
-        return { data: await res.json(), error: null };
-      }
+    var API_HEADERS = {
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=minimal'
     };
+    async function apiInsert(table, row) {
+      var res = await fetch(SUPABASE_URL + '/rest/v1/' + table, {
+        method: 'POST', headers: API_HEADERS, body: JSON.stringify(row)
+      });
+      if (!res.ok) return { error: { message: 'HTTP ' + res.status } };
+      return { error: null };
+    }
+    async function apiSelect(table, order) {
+      var url = SUPABASE_URL + '/rest/v1/' + table + '?select=*';
+      if (order) url += '&order=' + order;
+      var res = await fetch(url, { headers: API_HEADERS });
+      if (!res.ok) return { data: null, error: { message: 'HTTP ' + res.status } };
+      return { data: await res.json(), error: null };
+    }
 
     // ========== APPLICATION STATE ==========
     const state = {
@@ -219,7 +217,7 @@
       const btn = e ? e.target : document.getElementById('btnSubmitRSVP');
       btn.disabled = true;
       btn.textContent = '提交中...';
-      const { error } = await api.insert('responses', { name: state.name, datetime: state.datetime });
+      const { error } = await apiInsert('responses', { name: state.name, datetime: state.datetime });
       if (error) { alert('提交失败，请重试'); btn.disabled = false; btn.textContent = '确认提交'; return; }
       goNext();
     }
@@ -265,7 +263,7 @@ async function viewResponses() {
   errEl.textContent = '查询中...';
   errEl.style.display = 'block';
 
-  const { data, error } = await api.select('responses', 'created_at.asc');
+  const { data, error } = await apiSelect('responses', 'created_at.asc');
   if (error) {
     errEl.textContent = '查询失败: ' + error.message;
     errEl.style.display = 'block';
