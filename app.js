@@ -237,6 +237,25 @@
       btn.textContent = '提交中...';
       const { error } = await apiInsert('responses', { name: state.name, datetime: state.datetime });
       if (error) { alert('提交失败，请重试'); btn.disabled = false; btn.textContent = '确认提交'; return; }
+
+      // Check if this time slot now has exactly 4 players
+      try {
+        var ck = await fetch(SUPABASE_URL + '/rest/v1/responses?select=*&datetime=eq.' + encodeURIComponent(state.datetime), { headers: API_HEADERS });
+        var ckData = await ck.json();
+        if (ckData && ckData.length === 4) {
+          // Game is full! Send email notification
+          var names = ckData.map(function(p) { return p.name; }).join('、');
+          var locData = await fetch(SUPABASE_URL + '/rest/v1/locations?datetime=eq.' + encodeURIComponent(state.datetime), { headers: API_HEADERS });
+          var locJson = await locData.json();
+          var location = (locJson && locJson.length) ? locJson[0].location : '待定';
+          emailjs.send('service_mlknu5p', 'template_0tagkbg', {
+            game_time: state.datetime,
+            location: location,
+            players: names
+          }).catch(function() {});
+        }
+      } catch(e) {}
+
       goNext();
     }
 
