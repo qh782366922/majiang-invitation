@@ -253,6 +253,7 @@ function initStep6() {
 }
 
 async function viewResponses() {
+  try {
   const pwd = document.getElementById('hostPassword').value;
   const errEl = document.getElementById('hostError');
   if (pwd !== HOST_PASSWORD) {
@@ -261,6 +262,8 @@ async function viewResponses() {
     return;
   }
   errEl.style.display = 'none';
+  errEl.textContent = '查询中...';
+  errEl.style.display = 'block';
 
   const { data, error } = await api.select('responses', 'created_at.asc');
   if (error) {
@@ -268,6 +271,7 @@ async function viewResponses() {
     errEl.style.display = 'block';
     return;
   }
+  errEl.style.display = 'none';
   if (!data || data.length === 0) {
     document.getElementById('hostTable').innerHTML = '<p style="text-align:center;color:var(--gold);margin-top:20px;">还没有人报名 🀄</p>';
     return;
@@ -275,10 +279,14 @@ async function viewResponses() {
   let html = '<table class="host-table"><thead><tr><th>姓名</th><th>时间</th><th>提交时间</th></tr></thead><tbody>';
   data.forEach(row => {
     const created = new Date(row.created_at).toLocaleString('zh-CN');
-    html += `<tr><td>${escapeHtml(row.name)}</td><td>${escapeHtml(row.datetime)}</td><td>${created}</td></tr>`;
+    html += '<tr><td>' + escapeHtml(row.name) + '</td><td>' + escapeHtml(row.datetime) + '</td><td>' + created + '</td></tr>';
   });
   html += '</tbody></table>';
   document.getElementById('hostTable').innerHTML = html;
+  } catch(e) {
+    document.getElementById('hostError').textContent = '出错: ' + e.message;
+    document.getElementById('hostError').style.display = 'block';
+  }
 }
 
     // ========== UTILITIES ==========
