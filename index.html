@@ -816,6 +816,23 @@
   </style>
 </head>
 <body>
+<!-- Shuffle Loading Screen -->
+<div id="shuffleScreen" style="position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#2D8B4A,#1e6b34);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 0.5s,visibility 0.5s;">
+<div style="font-size:2.5rem;display:flex;flex-wrap:wrap;justify-content:center;gap:4px;max-width:300px;animation:shufflePulse 0.5s ease-in-out infinite;">
+🀇🀈🀉🀊🀋🀌🀍🀎🀏🀐🀑🀒🀓🀔🀕🀖🀗🀘🀙🀚🀛🀜🀝🀞🀟🀠🀡🀄🀅🀆
+</div>
+<p style="color:#fff;margin-top:16px;font-size:1.1rem;font-weight:700;">搓麻中...</p>
+</div>
+<style>@keyframes shufflePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.03)}}</style>
+<script>
+window.addEventListener('load',function(){
+  setTimeout(function(){
+    var s=document.getElementById('shuffleScreen');
+    s.style.opacity='0';s.style.visibility='hidden';
+  },1200);
+});
+</script>
+
   <div id="app">
     <!-- ========== STEP 1: INVITATION ========== -->
     <div id="step1" class="step active">
