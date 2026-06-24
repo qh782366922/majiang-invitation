@@ -11,23 +11,31 @@
       'Prefer': 'return=minimal'
     };
     async function apiInsert(table, row) {
-      var res = await fetch(SUPABASE_URL + '/rest/v1/' + table, {
-        method: 'POST', headers: API_HEADERS, body: JSON.stringify(row)
-      });
-      if (!res.ok) return { error: { message: 'HTTP ' + res.status } };
-      return { error: null };
+      try {
+        var res = await fetch(SUPABASE_URL + '/rest/v1/' + table, {
+          method: 'POST', headers: API_HEADERS, body: JSON.stringify(row)
+        });
+        if (!res.ok) return { error: { message: 'HTTP ' + res.status } };
+        return { error: null };
+      } catch(e) {
+        return { error: { message: e.message } };
+      }
     }
     async function apiSelect(table, order) {
       var url = SUPABASE_URL + '/rest/v1/' + table + '?select=*';
       if (order) url += '&order=' + order;
-      var res = await fetch(url, {
-        headers: {
-          'apikey': SUPABASE_KEY,
-          'Authorization': 'Bearer ' + SUPABASE_KEY
-        }
-      });
-      if (!res.ok) return { data: null, error: { message: 'HTTP ' + res.status } };
-      return { data: await res.json(), error: null };
+      try {
+        var res = await fetch(url, {
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': 'Bearer ' + SUPABASE_KEY
+          }
+        });
+        if (!res.ok) return { data: null, error: { message: 'HTTP ' + res.status } };
+        return { data: await res.json(), error: null };
+      } catch(e) {
+        return { data: null, error: { message: e.message } };
+      }
     }
 
     // ========== APPLICATION STATE ==========
