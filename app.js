@@ -133,6 +133,7 @@
 
     // ========== STEP 2 — NAME INPUT ==========
     function initStep2() {
+      injectGif(2);
       document.getElementById('nameInput').value = '';
       document.getElementById('nameInput').focus();
     }
@@ -150,6 +151,7 @@
 
     // ========== STEP 3 — CALENDAR ==========
     function initStep3() {
+      injectGif(3);
       const btnSelect = document.getElementById('btnSelectDate');
       const overlay = document.getElementById('calendarOverlay');
       btnSelect.onclick = () => { calDate = new Date(); calSelectedDay = null; renderCalendar(); overlay.classList.add('show'); };
@@ -206,6 +208,7 @@
 
     // ========== STEP 4 — CONFIRMATION CARD + SUPABASE SUBMIT ==========
     function initStep4() {
+      injectGif(4);
       const card = document.getElementById('confirmCard');
       card.innerHTML = `
         <div class="confirm-card">
@@ -271,8 +274,24 @@
       }
     }
 
+    // Step GIF mapping
+    var STEP_GIFS = {1:'mahjong1.gif',2:'mahjong1.gif',3:'mahjong1.gif',4:'mahjong1.gif'};
+    function injectGif(n) {
+      var step = document.getElementById('step'+n);
+      if (!step) return;
+      var emoji = step.querySelector('.step-emoji');
+      var gif = step.querySelector('.step-gif');
+      if (STEP_GIFS[n] && emoji && !gif) {
+        var img = document.createElement('img');
+        img.src = STEP_GIFS[n];
+        img.className = 'step-gif';
+        img.alt = 'sticker';
+        img.style.cssText = 'width:120px;height:120px;object-fit:contain;border-radius:20px;background:var(--cream);padding:8px;mix-blend-mode:multiply;animation:float 3s ease-in-out infinite;';
+        emoji.parentNode.replaceChild(img, emoji);
+      }
+    }
     function initStep1() {
-      // Step 1 ready — no special init needed
+      injectGif(1);
     }
 
     function initStep5() {
