@@ -304,6 +304,7 @@ async function viewResponses() {
     document.getElementById('hostError').style.display = 'block';
   }
 }
+window.viewResponses = viewResponses;
 
     // ========== UTILITIES ==========
     function escapeHtml(str) {
