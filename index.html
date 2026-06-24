@@ -937,60 +937,10 @@ window.addEventListener('load',function(){
   <!-- ========== APPLICATION SCRIPT ========== -->
   <script src="app.js"></script>
   <script>
-    // Safety fallback: if app.js didn't load, show error
-    window.addEventListener('DOMContentLoaded', function() {
-      if (typeof goNext === 'undefined') console.error('app.js failed to load');
-    });
-
-    // Inline host view (bypasses external app.js issues)
-    var SUPABASE_KEY_HOST = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ3Z2Jjc3RmcWpscmFxZm9waGp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMTMxOTksImV4cCI6MjA5Nzc4OTE5OX0.qjw1z2moKdpQ8piKwuKTGM69pl2wknuuN-8yWzdPmSk';
-    async function viewResponsesHostInline() {
-      try {
-        var pwd = document.getElementById('hostPassword').value;
-        var errEl = document.getElementById('hostError');
-        if (pwd !== 'majiang2024') { errEl.textContent = '密码错误'; errEl.style.display = 'block'; return; }
-        errEl.style.display = 'none';
-        errEl.textContent = '查询中...';
-        errEl.style.display = 'block';
-        var c = new AbortController();
-        var t = setTimeout(function() { c.abort(); }, 10000);
-        var r = await fetch('https://rwgbcstfqjlraqfophjw.supabase.co/rest/v1/responses?select=*&order=created_at.desc', { headers: { apikey: SUPABASE_KEY_HOST, Authorization: 'Bearer ' + SUPABASE_KEY_HOST }, signal: c.signal });
-        clearTimeout(t);
-        var data = await r.json();
-        errEl.style.display = 'none';
-        if (!data || !data.length) { document.getElementById('hostTable').innerHTML = '<p style=\"text-align:center;color:#D4A853;margin-top:20px;\">还没有人报名</p>'; return; }
-
-        // Group by datetime
-        var groups = {}, order = [];
-        for (var i = 0; i < data.length; i++) {
-          var dt = data[i].datetime;
-          if (!groups[dt]) { groups[dt] = []; order.push(dt); }
-          groups[dt].push(data[i]);
-        }
-
-        var h = '<p style=\"text-align:center;color:#888;font-size:0.9rem;margin-bottom:12px;\">共 ' + order.length + ' 场牌局，' + data.length + ' 人报名</p>';
-        for (var g = 0; g < order.length; g++) {
-          var dt = order[g];
-          var players = groups[dt];
-          var times = players.map(function(p) { return new Date(p.created_at).getTime(); });
-          var latest = new Date(Math.max.apply(null, times));
-          var gameNum = order.length - g;
-          h += '<div style=\"background:#fff;border-radius:16px;padding:16px;margin-bottom:16px;box-shadow:0 2px 12px rgba(0,0,0,0.06);text-align:left;\">';
-          h += '<div style=\"color:#2D8B4A;font-weight:700;font-size:1.05rem;margin-bottom:4px;\">🀄 牌局 #' + gameNum + '</div>';
-          h += '<div style=\"color:#888;font-size:0.8rem;margin-bottom:12px;\">📅 ' + dt + ' · 👥 ' + players.length + '/4 人 · 最新 ' + latest.toLocaleString('zh-CN') + '</div>';
-          h += '<table class=\"host-table\"><thead><tr><th>姓名</th><th>报名时间</th></tr></thead><tbody>';
-          for (var j = 0; j < players.length; j++) {
-            h += '<tr><td>' + players[j].name + '</td><td>' + new Date(players[j].created_at).toLocaleString('zh-CN') + '</td></tr>';
-          }
-          for (var k = players.length; k < 4; k++) {
-            h += '<tr><td style=\"color:#ccc;\">虚位以待...</td><td style=\"color:#ccc;\">—</td></tr>';
-          }
-          h += '</tbody></table></div>';
-        }
-        document.getElementById('hostTable').innerHTML = h;
-      } catch(e) { document.getElementById('hostError').textContent = '出错: ' + e.message; document.getElementById('hostError').style.display = 'block'; }
+    // Redirect ?host to dedicated host page
+    if (window.location.search.includes('host')) {
+      window.location.replace('host.html');
     }
-    window.viewResponsesHostInline = viewResponsesHostInline;
   </script>
 </body>
 </html>
