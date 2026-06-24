@@ -294,17 +294,15 @@ async function viewResponses() {
       if (e.target === this) hideNoOverlay();
     });
 
-    // ========== HOST MODE DETECTION ==========
-    if (window.location.search.includes('host')) {
-      // Jump directly to step 6 for host access
-      state.step = 6;
-      document.querySelectorAll('.step').forEach(function(s) { s.classList.remove('active'); });
-      document.getElementById('step6').classList.add('active');
-      initStep(6);
-    }
-
     // ========== INITIAL SETUP WITH EVENT BINDINGS ==========
     document.addEventListener('DOMContentLoaded', function() {
+      // Host mode detection
+      if (window.location.search.includes('host')) {
+        state.step = 6;
+        document.querySelectorAll('.step').forEach(function(s) { s.classList.remove('active'); });
+        document.getElementById('step6').classList.add('active');
+        initStep(6);
+      }
       // Bind all button click handlers
       var btnYes = document.getElementById('btnYes');
       var btnNo = document.getElementById('btnNo');
@@ -325,7 +323,9 @@ async function viewResponses() {
         if (e.target && e.target.id === 'btnSubmitRSVP') submitRSVP(e);
       });
 
-      initStep(1);
+      if (!window.location.search.includes('host')) {
+        initStep(1);
+      }
     });
 
     console.log('🀄 麻将邀约 — 已就绪 (fetch API mode)');
