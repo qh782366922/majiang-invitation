@@ -3,35 +3,47 @@
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>查看报名</title>
 <style>
 body{font-family:sans-serif;padding:16px;text-align:center;background:#FFF9F0;color:#3A3A3A}
-input{padding:12px;font-size:16px;border-radius:10px;border:2px solid #2D8B4A;margin:10px;text-align:center}
-button{padding:14px 40px;font-size:16px;background:#2D8B4A;color:#fff;border:none;border-radius:30px;cursor:pointer}
-#result{margin-top:20px;max-width:420px;margin-left:auto;margin-right:auto}
+input{padding:8px 12px;font-size:0.9rem;border-radius:8px;border:2px solid #2D8B4A;text-align:center}
+button{padding:8px 20px;font-size:0.9rem;background:#2D8B4A;color:#fff;border:none;border-radius:20px;cursor:pointer}
+#result{margin-top:20px;max-width:440px;margin-left:auto;margin-right:auto}
 table{width:100%;border-collapse:collapse;margin-top:8px}
-td,th{border:1px solid #eee;padding:10px 8px;font-size:0.95rem}
+td,th{border:1px solid #eee;padding:10px 8px;font-size:0.9rem}
 th{background:#2D8B4A;color:#fff;font-weight:700}
 .game-card{background:#fff;border-radius:16px;padding:16px;margin-bottom:20px;box-shadow:0 2px 12px rgba(0,0,0,0.06);text-align:left}
 .game-title{color:#2D8B4A;margin:0 0 4px 0;font-size:1.1rem}
-.game-meta{color:#888;font-size:0.8rem;margin:0 0 12px 0}
+.game-meta{color:#888;font-size:0.8rem;margin:0 0 8px 0}
+.loc-row{color:#2D8B4A;font-size:0.85rem;margin:0 0 12px 0;display:flex;align-items:center;gap:8px}
+.loc-inp{padding:4px 8px;border-radius:8px;border:2px solid #2D8B4A;font-size:0.85rem;width:180px}
 .empty-slot{color:#ccc}
+.btn-sm{padding:3px 12px;font-size:0.75rem;border:none;border-radius:10px;cursor:pointer}
+.btn-gold{background:#D4A853;color:#fff}
+.btn-gray{background:#ddd;color:#333}
 </style></head>
 <body>
 <h2>🀄 麻将报名查看</h2>
-<input type="password" id="pw" placeholder="输入密码">
-<button onclick="go()">查看</button>
+<input type="password" id="pw" placeholder="输入密码" style="padding:12px 16px;font-size:1rem;">
+<button onclick="go()" style="padding:12px 32px;font-size:1rem;">查看</button>
 <div id="result"></div>
 <script>
 var KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ3Z2Jjc3RmcWpscmFxZm9waGp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMTMxOTksImV4cCI6MjA5Nzc4OTE5OX0.qjw1z2moKdpQ8piKwuKTGM69pl2wknuuN-8yWzdPmSk';
+var locCache={};
+var HDR={apikey:KEY,Authorization:'Bearer '+KEY};
+var BASE='https://rwgbcstfqjlraqfophjw.supabase.co';
+
 async function go(){
   if(document.getElementById('pw').value!=='majiang2024'){document.getElementById('result').textContent='密码错误';return}
   document.getElementById('result').textContent='查询中...';
   try{
-    var c=new AbortController();var t=setTimeout(function(){c.abort()},10000);
-    var r=await fetch('https://rwgbcstfqjlraqfophjw.supabase.co/rest/v1/responses?select=*&order=created_at.desc',{headers:{apikey:KEY,Authorization:'Bearer '+KEY},signal:c.signal});
+    var c=new AbortController(),s=c.signal, t=setTimeout(function(){c.abort()},10000);
+    var r1=await fetch(BASE+'/rest/v1/responses?select=*&order=created_at.desc',{headers:HDR,signal:s});
+    var r2=await fetch(BASE+'/rest/v1/locations?select=*',{headers:HDR,signal:s});
     clearTimeout(t);
-    var data=await r.json();
+    var data=await r1.json();
+    var locs=await r2.json();
+    locCache={};
+    for(var i=0;i<locs.length;i++){locCache[locs[i].datetime]=locs[i].location;}
     if(!data||!data.length){document.getElementById('result').textContent='暂无报名';return}
 
-    // Group by datetime (same time = same game), newest first (data is already desc)
     var groups={}, order=[];
     for(var i=0;i<data.length;i++){
       var dt=data[i].datetime;
@@ -39,19 +51,21 @@ async function go(){
       groups[dt].push(data[i]);
     }
 
-    var h='<p style="color:#888;font-size:0.9rem;">共 '+order.length+' 场牌局，'+data.length+' 人报名</p>';
+    var h='<p style="color:#888;font-size:0.85rem;">共 '+order.length+' 场牌局，'+data.length+' 人报名</p>';
     for(var g=0;g<order.length;g++){
       var dt=order[g];
       var players=groups[dt];
       var times=players.map(function(p){return new Date(p.created_at).getTime()});
       var latest=new Date(Math.max.apply(null,times));
       var gameNum=order.length-g;
-      h+='<div class="game-card">';
+      var loc=locCache[dt]||'';
+      h+='<div class="game-card" id="card_'+g+'">';
       h+='<div class="game-title">🀄 牌局 #'+gameNum+'</div>';
       h+='<div class="game-meta">📅 '+dt+' &nbsp;·&nbsp; 👥 '+players.length+'/4 人 &nbsp;·&nbsp; 最新 '+latest.toLocaleString('zh-CN')+'</div>';
+      h+='<div class="loc-row" id="loc_'+g+'"><span>📍</span> <span id="loctxt_'+g+'">'+(loc||'未设置地点')+'</span> <button class="btn-sm btn-gold" id="editbtn_'+g+'" onclick="editLoc(\''+esc(dt)+'\',\'loctxt_'+g+'\',\'editbtn_'+g+'\')">编辑</button></div>';
       h+='<table><tr><th>姓名</th><th>报名时间</th></tr>';
       for(var j=0;j<players.length;j++){
-        h+='<tr><td>'+players[j].name+'</td><td>'+new Date(players[j].created_at).toLocaleString('zh-CN')+'</td></tr>';
+        h+='<tr><td>'+escHtml(players[j].name)+'</td><td>'+new Date(players[j].created_at).toLocaleString('zh-CN')+'</td></tr>';
       }
       for(var k=players.length;k<4;k++){
         h+='<tr><td class="empty-slot">虚位以待...</td><td class="empty-slot">—</td></tr>';
@@ -60,6 +74,34 @@ async function go(){
     }
     document.getElementById('result').innerHTML=h;
   }catch(e){document.getElementById('result').textContent='出错: '+e.message}
+}
+
+function esc(s){return s.replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function editLoc(dt,txtId,btnId){
+  var cur=locCache[dt]||'';
+  var div=document.getElementById(txtId).parentNode;
+  div.innerHTML='<span>📍</span> <input class="loc-inp" id="inp_'+txtId+'" value="'+cur.replace(/"/g,'&quot;')+'" placeholder="输入地点"> <button class="btn-sm" style="background:#2D8B4A;color:#fff;" onclick="saveLoc(\''+esc(dt)+'\',\''+txtId+'\',\''+btnId+'\')">保存</button> <button class="btn-sm btn-gray" onclick="cancelLoc(\''+esc(dt)+'\',\''+txtId+'\',\''+btnId+'\')">取消</button>';
+}
+
+function cancelLoc(dt,txtId,btnId){
+  var cur=locCache[dt]||'';
+  var div=document.getElementById(txtId).parentNode;
+  div.innerHTML='<span>📍</span> <span id="'+txtId+'">'+(cur||'未设置地点')+'</span> <button class="btn-sm btn-gold" id="'+btnId+'" onclick="editLoc(\''+esc(dt)+'\',\''+txtId+'\',\''+btnId+'\')">编辑</button>';
+}
+
+async function saveLoc(dt,txtId,btnId){
+  var val=document.getElementById('inp_'+txtId).value.trim();
+  if(!val)return;
+  try{
+    var c=new AbortController(),s=c.signal, t=setTimeout(function(){c.abort()},10000);
+    await fetch(BASE+'/rest/v1/locations?datetime=eq.'+encodeURIComponent(dt),{method:'DELETE',headers:HDR,signal:s});
+    await fetch(BASE+'/rest/v1/locations',{method:'POST',headers:Object.assign({'Content-Type':'application/json','Prefer':'return=minimal'},HDR),body:JSON.stringify({datetime:dt,location:val}),signal:s});
+    locCache[dt]=val;
+    var div=document.getElementById(txtId).parentNode;
+    div.innerHTML='<span>📍</span> <span id="'+txtId+'">'+val+'</span> <button class="btn-sm btn-gold" id="'+btnId+'" onclick="editLoc(\''+esc(dt)+'\',\''+txtId+'\',\''+btnId+'\')">编辑</button>';
+  }catch(e){alert('保存失败: '+e.message)}
 }
 </script>
 </body></html>
